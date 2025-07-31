@@ -50,6 +50,7 @@ class Job(Document):
     location: str
     status: JobStatus = JobStatus.OPEN
     posted_by_id: PydanticObjectId
+    reviewer_id: Optional[PydanticObjectId] = None
     created_at: datetime = Field(default_factory=datetime.utcnow)
 
     class Settings:
@@ -81,3 +82,4 @@ class JobCreate(BaseModel):
     company: str
     description: str
     location: str
+    reviewer_id: Optional[PydanticObjectId] = None
