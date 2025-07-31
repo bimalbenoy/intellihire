@@ -1,0 +1,4 @@
+{
+  "resume": "John Doe\n\nEducation:\n\nB.Tech in Computer Science, ABC University, 2019\n\nSkills:\n\nPython, Django, REST APIs, AWS, Docker, Git, CI/CD, PostgreSQL\n\nExperience:\n\n- 4+ years experience in backend development\n\n- Built RESTful APIs using Django and DRF\n\n- Deployed services to AWS EC2 and Lambda using Docker\n\n- Led CI/CD automation using GitHub Actions and Jenkins\n\n\f",
+  "job_description": "Education:\nBachelor's degree in Computer Science or related field\n\nSkills:\nPython, Django, AWS, Docker, CI/CD, REST APIs\n\nExperience:\n3+ years experience in backend development\nMust have experience deploying apps to AWS and building RESTful APIs\n"
+}
