@@ -26,10 +26,11 @@ class User(Document):
     created_at: datetime = Field(default_factory=datetime.utcnow)
 
     class Settings:
-        name = "jobs"
+        name = "users"
 
 class Job(Document):
     title: str
+    company: str
     description: str
     location: str
     status: JobStatus = JobStatus.OPEN
@@ -62,5 +63,6 @@ class Token(BaseModel):
 
 class JobCreate(BaseModel):
     title: str
+    company: str
     description: str
     location: str
