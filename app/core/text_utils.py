@@ -66,7 +66,6 @@ def extract_skills(text: str) -> Set[str]:
     for skill in SKILL_KEYWORDS:
         if re.search(r'\b' + re.escape(skill) + r'\b', text_lower):
             found_skills.add(skill)
-    # Fallback to tokenizing if no keywords are found
     if not found_skills:
         skills_list = re.split(r'[,;\n•\-=*()]', text_lower)
         for skill_token in skills_list:
@@ -98,38 +97,40 @@ def semantic_skill_similarity(set1: Set[str], set2: Set[str]) -> float:
     return embed_text(text1, text2)
 
 def split_sections(text: str) -> Dict[str, str]:
-    """Splits text into experience, skills, and education sections with fallbacks."""
+    """Splits text into experience, skills, and education sections using regex."""
     sections: Dict[str, str] = {"experience": "", "skills": "", "education": ""}
-    current_section: str = None
-    lines = text.splitlines()
-    temp_sections: Dict[str, List[str]] = {"experience": [], "skills": [], "education": []}
-
-    for line in lines:
-        norm_line = normalize_line(line)
-        if any(kw in norm_line for kw in ["experience", "work", "employment"]):
-            current_section = "experience"
-        elif any(kw in norm_line for kw in ["skill", "technologies", "tools", "competencies"]):
-            current_section = "skills"
-        elif any(kw in norm_line for kw in ["education", "qualification", "degree", "academic"]):
-            current_section = "education"
-        elif current_section:
-            temp_sections[current_section].append(line)
-
-    for sec_name, sec_lines in temp_sections.items():
-        sections[sec_name] = "\n".join(sec_lines).strip()
-
+    # A single regex to find all known headers and the content that follows
+    # (?s) enables the dot to match newlines
+    # (?=...|$) is a lookahead to stop at the next header or end of string
+    section_patterns = {
+        "experience": r'(?s)experience:(.*?)(?=\n(?:skills:|education:)|$)',
+        "skills": r'(?s)skills:(.*?)(?=\n(?:experience:|education:)|$)',
+        "education": r'(?s)education:(.*?)(?=\n(?:experience:|skills:)|$)',
+    }
+    
+    text_lower = text.lower()
+    
+    for section_name, pattern in section_patterns.items():
+        match = re.search(pattern, text_lower, re.IGNORECASE)
+        if match:
+            # We need to capture the original casing from the non-lower-cased text
+            original_match_text = re.search(pattern, text, re.IGNORECASE)
+            if original_match_text:
+                sections[section_name] = original_match_text.group(1).strip()
+    
+    # Fallback logic for sections without clear headers (same as before)
     if not sections["education"]:
         education_keywords_regex = r"(btech|b\.tech|bachelor|degree|master|phd|university|college|school|academic|institute)"
-        education_lines = [line for line in lines if re.search(education_keywords_regex, line.lower())]
+        education_lines = [line for line in text.splitlines() if re.search(education_keywords_regex, line.lower())]
         if education_lines: sections["education"] = "\n".join(education_lines).strip()
 
     if not sections["experience"]:
         experience_fallback_keywords = ["years", "backend", "frontend", "fullstack", "django", "rest", "develop", "engineer", "developed", "built", "managed", "led", "contributed", "architected", "implemented", "designed", "created", "maintained"]
-        experience_lines = [line for line in lines if any(kw in line.lower() for kw in experience_fallback_keywords)]
+        experience_lines = [line for line in text.splitlines() if any(kw in line.lower() for kw in experience_fallback_keywords)]
         if experience_lines: sections["experience"] = "\n".join(experience_lines).strip()
 
     if not sections["skills"]:
-        skills_lines = [line for line in lines if any(kw in line.lower() for kw in SKILL_KEYWORDS)]
+        skills_lines = [line for line in text.splitlines() if any(kw in line.lower() for kw in SKILL_KEYWORDS)]
         if skills_lines: sections["skills"] = "\n".join(skills_lines).strip()
 
     return sections
