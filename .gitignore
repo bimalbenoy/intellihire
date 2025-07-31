@@ -1,0 +1,32 @@
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*.so
+
+# Virtual environment
+venv/
+.env/
+
+# VSCode settings
+.vscode/
+
+# MacOS
+.DS_Store
+
+# Pytest / coverage
+.coverage
+htmlcov/
+.pytest_cache/
+
+# Logs
+*.log
+
+# Model files / cache
+*.safetensors
+*.pt
+*.bin
+*.pkl
+
+# Hugging Face
+huggingface/
+.cache/
