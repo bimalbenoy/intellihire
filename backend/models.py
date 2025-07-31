@@ -18,6 +18,11 @@ class CandidateInfo(BaseModel):
     full_name: str
     email: EmailStr
 
+class ApplicationStatus(str,Enum):
+    APPLIED = "applied"
+    SHORTLISTED = "shortlisted"
+    REJECTED = "rejected"
+
 class ApplicationforRecruiter(BaseModel):
     id: PydanticObjectId
     job_id: PydanticObjectId
@@ -27,11 +32,6 @@ class ApplicationforRecruiter(BaseModel):
     ai_match_score: float = 0.0
     status: ApplicationStatus
     applied_at: datetime
-    
-class ApplicationStatus(str,Enum):
-    APPLIED = "applied"
-    SHORTLISTED = "shortlisted"
-    REJECTED = "rejected"
 
 class User(Document):
     full_name: str

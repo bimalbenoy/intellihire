@@ -5,7 +5,7 @@ import os
 from fastapi.middleware.cors import CORSMiddleware
 
 from models import User, Job, Application
-from routes import auth
+from routes import auth, jobs, recruiterView
 from security import get_current_user
 
 app=FastAPI(title="IntelliHire AI ATS")
@@ -31,10 +31,10 @@ async def app_init():
 
     await init_beanie(database=client.intellihire, document_models=[User, Job, Application])
 
-app.include_router(auth_router.router, prefix="/auth", tags=["Authentication"])
-app.include_router(application_router.router, prefix="/applications", tags=["Applications"])
-app.include_router(recruiter_router.router, prefix="/recruiter", tags=["Recruiter Tools"])
-app.include_router(jobs_router.router, prefix="/jobs", tags=["Jobs"]) 
+app.include_router(auth.router, prefix="/auth", tags=["Authentication"])
+app.include_router(application.router, prefix="/applications", tags=["Applications"])
+app.include_router(recruiterView.router, prefix="/recruiter", tags=["Recruiter Tools"])
+app.include_router(jobs.router, prefix="/jobs", tags=["Jobs"]) 
 
 @app.get("/users/me",response_model=User)
 async def read_users_me(current_user: User = Depends(get_current_user)):
