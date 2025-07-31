@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import '../../pages/CandidateForm.css';
 import {
   Box,
   Button,
@@ -122,124 +123,104 @@ const SignUp = () => {
   };
 
   return (
-    <Container maxWidth="xs">
-      <Box
-        sx={{
-          marginTop: 8,
-          display: 'flex',
-          flexDirection: 'column',
-          alignItems: 'center',
-        }}
-      >
-        <Paper elevation={3} sx={{ p: 4, width: '100%' }}>
-          <Typography component="h1" variant="h5" align="center" gutterBottom>
-            Sign Up
-          </Typography>
+    <div className="page">
+      <div className="content" style={{ justifyContent: 'center', alignItems: 'center' }}>
+        <div className="upload-box" style={{ width: '100%', maxWidth: 480, margin: '3rem auto' }}>
+          <div style={{ fontWeight: 700, fontSize: '2rem', color: '#2563eb', textAlign: 'center', marginBottom: '1.5rem' }}>Sign Up</div>
           {submitError && (
-            <Alert severity="error" sx={{ mb: 2 }}>
+            <div style={{ background: '#fee2e2', color: '#b91c1c', borderRadius: '0.5rem', padding: '0.75rem 1rem', marginBottom: '1rem', textAlign: 'center' }}>
               {submitError}
-            </Alert>
+            </div>
           )}
-          <Box component="form" onSubmit={handleSubmit} sx={{ mt: 1 }}>
-            <TextField
-              margin="normal"
-              required
-              fullWidth
-              id="firstName"
-              label="First Name"
+          <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
+            <input
+              className="upload-input"
+              type="text"
               name="firstName"
-              autoComplete="given-name"
-              autoFocus
+              placeholder="First Name"
               value={formData.firstName}
               onChange={handleChange}
-              error={Boolean(errors.firstName)}
-              helperText={errors.firstName}
-            />
-            <TextField
-              margin="normal"
               required
-              fullWidth
-              id="lastName"
-              label="Last Name"
+              style={{ fontSize: '1.1rem' }}
+            />
+            <input
+              className="upload-input"
+              type="text"
               name="lastName"
-              autoComplete="family-name"
+              placeholder="Last Name"
               value={formData.lastName}
               onChange={handleChange}
-              error={Boolean(errors.lastName)}
-              helperText={errors.lastName}
-            />
-            <TextField
-              margin="normal"
               required
-              fullWidth
-              id="email"
-              label="Email Address"
+              style={{ fontSize: '1.1rem' }}
+            />
+            <input
+              className="upload-input"
+              type="email"
               name="email"
-              autoComplete="email"
+              placeholder="Email Address"
               value={formData.email}
               onChange={handleChange}
-              error={Boolean(errors.email)}
-              helperText={errors.email}
-            />
-            <TextField
-              margin="normal"
               required
-              fullWidth
-              name="password"
-              label="Password"
+              style={{ fontSize: '1.1rem' }}
+            />
+            <input
+              className="upload-input"
               type="password"
-              id="password"
-              autoComplete="new-password"
+              name="password"
+              placeholder="Password"
               value={formData.password}
               onChange={handleChange}
-              error={Boolean(errors.password)}
-              helperText={errors.password}
-            />
-            <TextField
-              margin="normal"
               required
-              fullWidth
-              name="confirmPassword"
-              label="Confirm Password"
+              style={{ fontSize: '1.1rem' }}
+            />
+            <input
+              className="upload-input"
               type="password"
-              id="confirmPassword"
+              name="confirmPassword"
+              placeholder="Confirm Password"
               value={formData.confirmPassword}
               onChange={handleChange}
-              error={Boolean(errors.confirmPassword)}
-              helperText={errors.confirmPassword}
-            />
-            <TextField
-              select
-              margin="normal"
               required
-              fullWidth
+              style={{ fontSize: '1.1rem' }}
+            />
+            <select
+              className="upload-input"
               name="role"
-              label="Role"
               value={formData.role}
               onChange={handleChange}
+              required
+              style={{ fontSize: '1.1rem' }}
             >
-              <MenuItem value="candidate">Candidate</MenuItem>
-              <MenuItem value="reviewer">Reviewer</MenuItem>
-              <MenuItem value="admin">Admin</MenuItem>
-            </TextField>
-            <Button
+              <option value="candidate">Candidate</option>
+              <option value="reviewer">Reviewer</option>
+              <option value="admin">Admin</option>
+            </select>
+            <button
               type="submit"
-              fullWidth
-              variant="contained"
-              sx={{ mt: 3, mb: 2 }}
+              style={{
+                background: '#2563eb',
+                color: 'white',
+                border: 'none',
+                borderRadius: '0.5rem',
+                padding: '0.75rem 0',
+                fontWeight: 700,
+                fontSize: '1.1rem',
+                cursor: 'pointer',
+                marginTop: '0.5rem'
+              }}
               disabled={isLoading}
             >
               {isLoading ? 'Signing up...' : 'Sign Up'}
-            </Button>
-            <Box sx={{ textAlign: 'center' }}>
-              <Link component={RouterLink} to="/login" variant="body2">
+            </button>
+            <div style={{ textAlign: 'center', marginTop: '0.5rem' }}>
+              <a href="/login" style={{ color: '#2563eb', textDecoration: 'underline', fontWeight: 500 }}>
                 Already have an account? Sign In
-              </Link>
-            </Box>
-          </Box>
-        </Paper>
-      </Box>
-    </Container>
+              </a>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
   );
 };
 
