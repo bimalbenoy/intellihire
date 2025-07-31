@@ -1,7 +1,7 @@
 import smtplib
 from email.mime.text import MIMEText
 
-APP_PASSWORD = "/enter the passsword here/"
+APP_PASSWORD = "ebmg cfpb vyih dnmp" #enter password
 #for app password ensure the sending mail(company_mail_id) has 2 step verification activated.
 #Generate an app password and set it as APP PASSWORD above (it's 16 characters)
 def send_rejection_mail(mail_id : str, name : str, role : str, company_name : str, company_mail_id: str):
@@ -20,3 +20,10 @@ def send_rejection_mail(mail_id : str, name : str, role : str, company_name : st
     print(f"Email sent to {mail_id}")
 
 #call function with the parameters.
+send_rejection_mail(
+    mail_id="hormis9919@gmail.com",  # Use a test recipient (e.g. your own)
+    name="John Doe",
+    role="Backend Developer",
+    company_name="TechCorp",
+    company_mail_id="videodictator0@gmail.com"
+)
