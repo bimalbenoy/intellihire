@@ -65,29 +65,42 @@ const Login = () => {
     }
   };
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    setSubmitError('');
+const handleSubmit = async (e) => {
+  e.preventDefault();
+  setSubmitError('');
 
-    if (!validateForm()) {
-      return;
+  if (!validateForm()) {
+    return;
+  }
+
+  setIsLoading(true);
+  try {
+    const response = await fetch('http://localhost:8000/auth/login', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(formData),
+    });
+
+    if (!response.ok) {
+      const errorData = await response.json();
+      throw new Error(errorData.detail || 'Login failed');
     }
 
-    setIsLoading(true);
-    try {
-      // TODO: Implement actual login logic here
-      console.log('Login form submitted:', formData);
-      // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      
-      // If successful, you might want to redirect to dashboard
-      // navigate('/dashboard');
-    } catch (error) {
-      setSubmitError(error.message || 'Invalid email or password');
-    } finally {
-      setIsLoading(false);
-    }
-  };
+    const data = await response.json();
+    localStorage.setItem('token', data.access_token); // Store token
+    console.log('Login successful:', data);
+
+    // Optional: Redirect to dashboard or home
+    // navigate('/dashboard');
+  } catch (error) {
+    setSubmitError(error.message || 'Login error');
+  } finally {
+    setIsLoading(false);
+  }
+};
+
 
   return (
     <Container maxWidth="xs">

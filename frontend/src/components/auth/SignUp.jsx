@@ -97,29 +97,47 @@ const SignUp = () => {
     }
   };
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    setSubmitError('');
+const handleSubmit = async (e) => {
+  e.preventDefault();
+  setSubmitError('');
 
-    if (!validateForm()) {
-      return;
+  if (!validateForm()) {
+    return;
+  }
+
+  setIsLoading(true);
+  try {
+    const payload = {
+      first_name: formData.firstName,
+      last_name: formData.lastName,
+      email: formData.email,
+      password: formData.password,
+      role: formData.role,
+    };
+
+    const response = await fetch('http://localhost:8000/auth/signup', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(payload),
+    });
+
+    if (!response.ok) {
+      const errorData = await response.json();
+      throw new Error(errorData.detail || 'Signup failed');
     }
 
-    setIsLoading(true);
-    try {
-      // TODO: Implement actual signup logic here
-      console.log('Signup form submitted:', formData);
-      // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      
-      // If successful, you might want to redirect to login
-      // navigate('/login');
-    } catch (error) {
-      setSubmitError(error.message || 'An error occurred during signup');
-    } finally {
-      setIsLoading(false);
-    }
-  };
+    // Optional: redirect to login page after successful signup
+    // navigate('/login');
+    console.log('Signup successful!');
+  } catch (error) {
+    setSubmitError(error.message || 'An error occurred during signup');
+  } finally {
+    setIsLoading(false);
+  }
+};
+
 
   return (
     <Container maxWidth="xs">
