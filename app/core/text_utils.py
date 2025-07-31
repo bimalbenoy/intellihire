@@ -1,14 +1,52 @@
+# app/core/text_utils.py
+
 import re
-from sentence_transformers import SentenceTransformer, util
+import nltk
 from typing import Dict, Set, List, Any
+from nltk.corpus import stopwords
+from nltk.stem import WordNetLemmatizer
+from sentence_transformers import SentenceTransformer, util
+
+# Ensure NLTK data is downloaded
+try:
+    stopwords.words('english')
+except LookupError:
+    nltk.download('stopwords')
+try:
+    WordNetLemmatizer()
+except LookupError:
+    nltk.download('wordnet')
+try:
+    nltk.word_tokenize('test')
+except LookupError:
+    nltk.download('punkt')
 
 DEGREE_EQUIVALENTS: Dict[str, str] = {
     "btech": "bachelor", "b.tech": "bachelor", "bachelors": "bachelor", "b.sc": "bachelor", "bs": "bachelor",
+    "b.a.": "bachelor", "ba": "bachelor", "bsc": "bachelor",
     "mtech": "master", "m.tech": "master", "masters": "master", "m.sc": "master", "ms": "master",
+    "m.a.": "master", "ma": "master", "msc": "master", "mba": "master",
     "phd": "doctorate", "doctorate": "doctorate"
 }
 
-sbert_model = SentenceTransformer('all-MiniLM-L6-v2') # Load SBERT model globally
+sbert_model = SentenceTransformer('all-MiniLM-L6-v2')
+stop_words = set(stopwords.words('english'))
+lemmatizer = WordNetLemmatizer()
+
+SKILL_KEYWORDS = [
+    'python', 'java', 'javascript', 'c++', 'c#', 'php', 'ruby', 'go', 'swift', 'kotlin', 'r',
+    'sql', 'nosql', 'postgresql', 'mysql', 'mongodb', 'redis', 'oracle',
+    'docker', 'kubernetes', 'aws', 'azure', 'gcp', 'terraform', 'ansible', 'jenkins', 'ci/cd',
+    'git', 'github', 'gitlab', 'django', 'flask', 'spring', 'springboot', 'nodejs', 'react', 'angular',
+    'vue', 'express', 'html', 'css', 'sass', 'machine learning', 'data science', 'ai', 'nlp',
+    'computer vision', 'deep learning', 'pytorch', 'tensorflow', 'scikit-learn', 'pandas', 'numpy',
+    'spark', 'hadoop', 'big data', 'kafka', 'etl', 'agile', 'scrum', 'jira', 'confluence', 'rest api',
+    'graphql', 'microservices', 'cloud computing', 'linux', 'unix', 'shell scripting', 'networking',
+    'tcp/ip', 'cybersecurity', 'tableau', 'power bi', 'excel', 'data visualization', 'aws ec2', 'aws s3',
+    'aws rds', 'aws lambda', 'restful', 'api', 'ui/ux', 'frontend', 'backend', 'fullstack', 'database',
+    'devops', 'testing', 'qa', 'customer service', 'project management', 'communication', 'problem solving',
+    'leadership'
+]
 
 def clean(text: str) -> str:
     """Cleans text by converting to lowercase and removing non-alphanumeric characters."""
@@ -21,10 +59,22 @@ def normalize_line(line: str) -> str:
     return re.sub(r'[^a-z]', '', line.strip().lower())
 
 def extract_skills(text: str) -> Set[str]:
-    """Extracts a set of normalized skills."""
+    """Extracts a set of skills using a keyword list and fallback tokenization."""
     if not isinstance(text, str): return set()
-    skills_list = re.split(r'[,;\n•\-=*]', text)
-    return {skill.strip().lower() for skill in skills_list if skill.strip()}
+    found_skills = set()
+    text_lower = text.lower()
+    for skill in SKILL_KEYWORDS:
+        if re.search(r'\b' + re.escape(skill) + r'\b', text_lower):
+            found_skills.add(skill)
+    # Fallback to tokenizing if no keywords are found
+    if not found_skills:
+        skills_list = re.split(r'[,;\n•\-=*()]', text_lower)
+        for skill_token in skills_list:
+            token = skill_token.strip()
+            if token and token not in stop_words and len(token) > 1:
+                lemmatized_token = lemmatizer.lemmatize(token)
+                found_skills.add(lemmatized_token)
+    return found_skills
 
 def jaccard_similarity(set1: Set[str], set2: Set[str]) -> float:
     """Calculates Jaccard similarity between two sets."""
@@ -39,6 +89,13 @@ def embed_text(text1: str, text2: str) -> float:
     emb1 = sbert_model.encode(text1, convert_to_tensor=True)
     emb2 = sbert_model.encode(text2, convert_to_tensor=True)
     return float(util.cos_sim(emb1, emb2).item())
+
+def semantic_skill_similarity(set1: Set[str], set2: Set[str]) -> float:
+    """Calculates semantic similarity between sets of skill keywords."""
+    if not set1 or not set2: return 0.0
+    text1 = " ".join(sorted(list(set1)))
+    text2 = " ".join(sorted(list(set2)))
+    return embed_text(text1, text2)
 
 def split_sections(text: str) -> Dict[str, str]:
     """Splits text into experience, skills, and education sections with fallbacks."""
@@ -72,8 +129,7 @@ def split_sections(text: str) -> Dict[str, str]:
         if experience_lines: sections["experience"] = "\n".join(experience_lines).strip()
 
     if not sections["skills"]:
-        skills_fallback_keywords = ["python", "docker", "aws", "ci/cd", "git", "rest", "javascript", "java", "sql", "linux", "api", "database", "cloud", "agile", "microservices", "kubernetes", "html", "css", "react", "angular", "vue", "node", "php", "c++", "c#", "azure", "gcp", "data science", "machine learning", "nlp", "tableau", "excel", "powerbi", "salesforce"]
-        skills_lines = [line for line in lines if any(kw in line.lower() for kw in skills_fallback_keywords)]
+        skills_lines = [line for line in lines if any(kw in line.lower() for kw in SKILL_KEYWORDS)]
         if skills_lines: sections["skills"] = "\n".join(skills_lines).strip()
 
     return sections
@@ -88,12 +144,11 @@ def split_jd_sections(text: str) -> Dict[str, str]:
 
 def normalize_degrees(text: str) -> str:
     """Normalizes degree variations while preserving other content."""
-    cleaned_text = clean(text)
-    if not cleaned_text: return ""
-    normalized_text = cleaned_text
+    if not isinstance(text, str): return ""
+    normalized_text = text.lower()
     for variant, standard in DEGREE_EQUIVALENTS.items():
         normalized_text = re.sub(r'\b' + re.escape(variant) + r'\b', standard, normalized_text)
-    return normalized_text
+    return re.sub(r'[^a-zA-Z0-9 ]', '', normalized_text)
 
 def extract_field_keywords(text: str) -> Set[str]:
     """Extracts potential field/major keywords from education text."""
@@ -164,10 +219,8 @@ def score_applicant(resume_text: str, jd_text: str) -> Dict[str, Any]:
     resume_sections = split_resume_sections(resume_text)
     jd_sections = split_jd_sections(jd_text)
 
-    experience_score = embed_text(resume_sections.get("experience", ""), jd_sections.get("experience", ""))
-    skill_score = jaccard_similarity(extract_skills(resume_sections.get("skills", "")), extract_skills(jd_sections.get("skills", "")))
-    education_score = match_education(resume_sections.get("education", ""), jd_sections.get("education", ""))
-
+    # --- Experience Score Calculation ---
+    semantic_exp_score = embed_text(resume_sections.get("experience", ""), jd_sections.get("experience", ""))
     resume_years = extract_years(resume_sections.get("experience", ""))
     jd_required_years = extract_years(jd_sections.get("experience", ""))
     years_score = 0.0
@@ -177,36 +230,53 @@ def score_applicant(resume_text: str, jd_text: str) -> Dict[str, Any]:
         years_score = 0.75
     else:
         years_score = 1.0
+    experience_score = round((0.7 * semantic_exp_score + 0.3 * years_score), 2)
 
-    W_EXPERIENCE = 0.35
-    W_SKILL = 0.35
+    # --- Skill Score Calculation ---
+    resume_skills = extract_skills(resume_sections.get("skills", ""))
+    jd_skills = extract_skills(jd_sections.get("skills", ""))
+    jaccard_skill_score = jaccard_similarity(resume_skills, jd_skills)
+    semantic_skill_score = semantic_skill_similarity(resume_skills, jd_skills)
+    skill_score = round(min(0.7 * jaccard_skill_score + 0.3 * semantic_skill_score, 1.0), 2)
+    
+    # --- Education Score Calculation ---
+    education_score = round(match_education(resume_sections.get("education", ""), jd_sections.get("education", "")), 2)
+
+    # --- Final Score Calculation ---
+    W_EXPERIENCE = 0.40
+    W_SKILL = 0.40
     W_EDUCATION = 0.20
-    W_YEARS = 0.10
-
-    total_score = (experience_score * W_EXPERIENCE + skill_score * W_SKILL + education_score * W_EDUCATION + years_score * W_YEARS) * 100
+    final_score = (
+        W_EXPERIENCE * experience_score + 
+        W_SKILL * skill_score + 
+        W_EDUCATION * education_score
+    )
+    final_percentage = round(final_score * 100, 2)
 
     status = "Disqualified"
-    if total_score >= 70: status = "Qualified"
-    elif total_score >= 45: status = "Maybe"
+    if final_percentage >= 70: status = "Qualified"
+    elif final_percentage >= 45: status = "Maybe"
 
     return {
-        "score": round(total_score, 1),
+        "score": final_percentage,
         "status": status,
         "section_scores": {
-            "experience_score": round(experience_score, 2),
-            "skill_score": round(skill_score, 2),
-            "education_score": round(education_score, 2),
+            "experience_score": experience_score,
+            "skill_score": skill_score,
+            "education_score": education_score,
+            "jaccard_skill_score": round(jaccard_skill_score, 2),
+            "semantic_skill_score": round(semantic_skill_score, 2),
             "years_score": round(years_score, 2)
         },
         "extracted_content": {
             "resume": {
-                "experience": resume_sections.get("experience", ""), "skills": list(extract_skills(resume_sections.get("skills", ""))),
+                "experience": resume_sections.get("experience", ""), "skills": list(resume_skills),
                 "education": resume_sections.get("education", ""), "years_experience": resume_years,
                 "education_norm": normalize_degrees(resume_sections.get("education", "")),
                 "education_fields": list(extract_field_keywords(normalize_degrees(resume_sections.get("education", ""))))
             },
             "jd": {
-                "experience": jd_sections.get("experience", ""), "skills": list(extract_skills(jd_sections.get("skills", ""))),
+                "experience": jd_sections.get("experience", ""), "skills": list(jd_skills),
                 "education": jd_sections.get("education", ""), "required_years": jd_required_years,
                 "education_norm": normalize_degrees(jd_sections.get("education", "")),
                 "education_fields": list(extract_field_keywords(normalize_degrees(jd_sections.get("education", ""))))
