@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import '../../pages/CandidateForm.css';
 import {
   Box,
   Button,
@@ -90,71 +91,62 @@ const Login = () => {
   };
 
   return (
-    <Container maxWidth="xs">
-      <Box
-        sx={{
-          marginTop: 8,
-          display: 'flex',
-          flexDirection: 'column',
-          alignItems: 'center',
-        }}
-      >
-        <Paper elevation={3} sx={{ p: 4, width: '100%' }}>
-          <Typography component="h1" variant="h5" align="center" gutterBottom>
-            Sign In
-          </Typography>
+    <div className="page">
+      <div className="content" style={{ justifyContent: 'center', alignItems: 'center' }}>
+        <div className="upload-box" style={{ width: '100%', maxWidth: 420, margin: '4rem auto' }}>
+          <div style={{ fontWeight: 700, fontSize: '2rem', color: '#2563eb', textAlign: 'center', marginBottom: '1.5rem' }}>Sign In</div>
           {submitError && (
-            <Alert severity="error" sx={{ mb: 2 }}>
+            <div style={{ background: '#fee2e2', color: '#b91c1c', borderRadius: '0.5rem', padding: '0.75rem 1rem', marginBottom: '1rem', textAlign: 'center' }}>
               {submitError}
-            </Alert>
+            </div>
           )}
-          <Box component="form" onSubmit={handleSubmit} sx={{ mt: 1 }}>
-            <TextField
-              margin="normal"
-              required
-              fullWidth
-              id="email"
-              label="Email Address"
+          <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
+            <input
+              className="upload-input"
+              type="email"
               name="email"
-              autoComplete="email"
-              autoFocus
+              placeholder="Email Address"
               value={formData.email}
               onChange={handleChange}
-              error={Boolean(errors.email)}
-              helperText={errors.email}
-            />
-            <TextField
-              margin="normal"
               required
-              fullWidth
-              name="password"
-              label="Password"
+              style={{ fontSize: '1.1rem' }}
+            />
+            <input
+              className="upload-input"
               type="password"
-              id="password"
-              autoComplete="current-password"
+              name="password"
+              placeholder="Password"
               value={formData.password}
               onChange={handleChange}
-              error={Boolean(errors.password)}
-              helperText={errors.password}
+              required
+              style={{ fontSize: '1.1rem' }}
             />
-            <Button
+            <button
               type="submit"
-              fullWidth
-              variant="contained"
-              sx={{ mt: 3, mb: 2 }}
+              style={{
+                background: '#2563eb',
+                color: 'white',
+                border: 'none',
+                borderRadius: '0.5rem',
+                padding: '0.75rem 0',
+                fontWeight: 700,
+                fontSize: '1.1rem',
+                cursor: 'pointer',
+                marginTop: '0.5rem'
+              }}
               disabled={isLoading}
             >
               {isLoading ? 'Signing in...' : 'Sign In'}
-            </Button>
-            <Box sx={{ textAlign: 'center' }}>
-              <Link component={RouterLink} to="/signup" variant="body2">
+            </button>
+            <div style={{ textAlign: 'center', marginTop: '0.5rem' }}>
+              <a href="/signup" style={{ color: '#2563eb', textDecoration: 'underline', fontWeight: 500 }}>
                 Don't have an account? Sign Up
-              </Link>
-            </Box>
-          </Box>
-        </Paper>
-      </Box>
-    </Container>
+              </a>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
   );
 };
 
