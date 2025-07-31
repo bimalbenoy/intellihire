@@ -32,7 +32,7 @@ async def app_init():
     await init_beanie(database=client.intellihire, document_models=[User, Job, Application])
 
 app.include_router(auth.router, prefix="/auth", tags=["Authentication"])
-app.include_router(application.router, prefix="/applications", tags=["Applications"])
+#app.include_router(application.router, prefix="/applications", tags=["Applications"])
 app.include_router(recruiterView.router, prefix="/recruiter", tags=["Recruiter Tools"])
 app.include_router(jobs.router, prefix="/jobs", tags=["Jobs"]) 
 
