@@ -31,7 +31,10 @@ async def app_init():
 
     await init_beanie(database=client.intellihire, document_models=[User, Job, Application])
 
-app.include_router(auth.router,prefix="/auth", tags=["auth"])
+app.include_router(auth_router.router, prefix="/auth", tags=["Authentication"])
+app.include_router(application_router.router, prefix="/applications", tags=["Applications"])
+app.include_router(recruiter_router.router, prefix="/recruiter", tags=["Recruiter Tools"])
+app.include_router(jobs_router.router, prefix="/jobs", tags=["Jobs"]) 
 
 @app.get("/users/me",response_model=User)
 async def read_users_me(current_user: User = Depends(get_current_user)):

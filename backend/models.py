@@ -13,6 +13,21 @@ class JobStatus(str,Enum):
     OPEN = "open"
     CLOSED = "closed"
 
+class CandidateInfo(BaseModel):
+    id: PydanticObjectId
+    full_name: str
+    email: EmailStr
+
+class ApplicationforRecruiter(BaseModel):
+    id: PydanticObjectId
+    job_id: PydanticObjectId
+    candidate: CandidateInfo
+    resume: str 
+    cover_letter: Optional[str] = None
+    ai_match_score: float = 0.0
+    status: ApplicationStatus
+    applied_at: datetime
+    
 class ApplicationStatus(str,Enum):
     APPLIED = "applied"
     SHORTLISTED = "shortlisted"
