@@ -268,19 +268,5 @@ def score_applicant(resume_text: str, jd_text: str) -> Dict[str, Any]:
             "jaccard_skill_score": round(jaccard_skill_score, 2),
             "semantic_skill_score": round(semantic_skill_score, 2),
             "years_score": round(years_score, 2)
-        },
-        "extracted_content": {
-            "resume": {
-                "experience": resume_sections.get("experience", ""), "skills": list(resume_skills),
-                "education": resume_sections.get("education", ""), "years_experience": resume_years,
-                "education_norm": normalize_degrees(resume_sections.get("education", "")),
-                "education_fields": list(extract_field_keywords(normalize_degrees(resume_sections.get("education", ""))))
-            },
-            "jd": {
-                "experience": jd_sections.get("experience", ""), "skills": list(jd_skills),
-                "education": jd_sections.get("education", ""), "required_years": jd_required_years,
-                "education_norm": normalize_degrees(jd_sections.get("education", "")),
-                "education_fields": list(extract_field_keywords(normalize_degrees(jd_sections.get("education", ""))))
-            }
         }
     }
